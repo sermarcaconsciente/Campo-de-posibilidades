@@ -1,0 +1,895 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campo de Posibilidades</title>
+<style>
+  :root{
+    color-scheme:light;
+    --bg:#FAF3E4;
+    --surface:#FFFDF9;
+    --surface-2:#F3E9D6;
+    --text:#2B1F1A;
+    --text-muted:#7C6A5B;
+    --border:rgba(43,31,26,0.14);
+    --shadow:rgba(43,31,26,0.10);
+    --accent:#A71039;
+    --accent-contrast:#FFFFFF;
+    --accent-soft:rgba(167,16,57,0.10);
+    --gold:#A97324;
+    --gold-contrast:#FFFFFF;
+    --gold-soft:rgba(169,115,36,0.14);
+    --soma:#8B5E4A;
+    --soma-soft:rgba(139,94,74,0.12);
+    --verde:#5B7B4F;
+    --verde-soft:rgba(91,123,79,0.14);
+    --pilar-identidad:#3B5BA5;
+    --pilar-autenticidad:#009985;
+    --pilar-expresion:#7A4A96;
+    --font-display:'Prata', Georgia, 'Times New Roman', serif;
+    --font-editorial:'Cormorant Garamond', Georgia, serif;
+    --font-body:'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme:dark;
+      --bg:#1E1611;
+      --surface:#2A211B;
+      --surface-2:#332821;
+      --text:#F3E7D8;
+      --text-muted:#B7A38E;
+      --border:rgba(243,231,216,0.14);
+      --shadow:rgba(0,0,0,0.4);
+      --accent:#E2597C;
+      --accent-contrast:#241016;
+      --accent-soft:rgba(226,89,124,0.16);
+      --gold:#D9A54E;
+      --gold-contrast:#241A0A;
+      --gold-soft:rgba(217,165,78,0.18);
+      --soma:#D3A88B;
+      --soma-soft:rgba(211,168,139,0.16);
+      --verde:#8FB37D;
+      --verde-soft:rgba(143,179,125,0.18);
+      --pilar-identidad:#4A6BC0;
+      --pilar-autenticidad:#1F9683;
+      --pilar-expresion:#9468BC;
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --bg:#1E1611;
+    --surface:#2A211B;
+    --surface-2:#332821;
+    --text:#F3E7D8;
+    --text-muted:#B7A38E;
+    --border:rgba(243,231,216,0.14);
+    --shadow:rgba(0,0,0,0.4);
+    --accent:#E2597C;
+    --accent-contrast:#241016;
+    --accent-soft:rgba(226,89,124,0.16);
+    --gold:#D9A54E;
+    --gold-contrast:#241A0A;
+    --gold-soft:rgba(217,165,78,0.18);
+    --soma:#D3A88B;
+    --soma-soft:rgba(211,168,139,0.16);
+    --verde:#8FB37D;
+    --verde-soft:rgba(143,179,125,0.18);
+    --pilar-identidad:#4A6BC0;
+    --pilar-autenticidad:#1F9683;
+    --pilar-expresion:#9468BC;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; animation:none !important; }
+    html{ scroll-behavior:auto; }
+  }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+  }
+  #app{
+    max-width:700px;
+    margin:0 auto;
+    padding:48px 20px 80px;
+  }
+  .page-head{ margin-bottom:36px; }
+  .eyebrow{
+    font-family:var(--font-body);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin:0 0 10px;
+  }
+  h1{
+    font-family:var(--font-display);
+    font-weight:400;
+    font-size:38px;
+    line-height:1.15;
+    margin:0 0 14px;
+    text-wrap:balance;
+    color:var(--text);
+  }
+  .intro{
+    font-family:var(--font-editorial);
+    font-style:italic;
+    font-size:19px;
+    line-height:1.5;
+    color:var(--text-muted);
+    max-width:52ch;
+    margin:0 0 22px;
+  }
+  .stats{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .stat{
+    font-family:var(--font-body);
+    font-size:13px;
+    padding:7px 14px;
+    border-radius:999px;
+    color:var(--text);
+  }
+  .stat strong{ font-weight:700; }
+  .stat-gold{ background:var(--gold-soft); }
+  .stat-ruby{ background:var(--accent-soft); }
+  .stat-verde{ background:var(--verde-soft); }
+  .summary{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px 20px;
+    margin-bottom:18px;
+  }
+  .summary-title{
+    font-family:var(--font-body);
+    font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--text-muted);
+    margin:0 0 6px;
+  }
+  .summary-list{ list-style:none; margin:0; padding:0; }
+  .summary-item{ border-top:1px solid var(--border); }
+  .summary-item:first-child{ border-top:none; }
+  .summary-item.is-amarillo{ --estado-color:var(--gold); }
+  .summary-item.is-rojo{ --estado-color:var(--accent); }
+  .summary-item.is-verde{ --estado-color:var(--verde); }
+  .summary-link{
+    display:flex; align-items:center; gap:10px;
+    padding:9px 2px;
+    text-decoration:none;
+    color:var(--text);
+    font-family:var(--font-body); font-size:14px;
+  }
+  .summary-link:hover .summary-lugar{ text-decoration:underline; }
+  .summary-lugar{ flex:1; }
+  .summary-estado{
+    font-size:11px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;
+    color:var(--text-muted);
+    flex:none;
+  }
+  .summary-subtitle{
+    font-family:var(--font-body);
+    font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--text-muted);
+    margin:16px 0 8px;
+    padding-top:14px;
+    border-top:1px solid var(--border);
+  }
+  .summary-subtitle-first{
+    margin-top:0;
+    padding-top:0;
+    border-top:none;
+  }
+  .avance-row{ display:flex; align-items:center; gap:12px; }
+  .avance-bar{
+    flex:1;
+    height:8px;
+    border-radius:4px;
+    overflow:hidden;
+    background:var(--surface-2);
+  }
+  .avance-fill{
+    display:block;
+    height:100%;
+    border-radius:4px;
+    background:var(--verde);
+  }
+  .avance-pct{
+    font-family:var(--font-body); font-size:13px; font-weight:700;
+    color:var(--text);
+    flex:none; min-width:38px; text-align:right;
+  }
+  .avance-retos{
+    font-family:var(--font-body); font-size:13px; color:var(--text-muted);
+    margin:8px 0 0;
+  }
+  .pilar-bar{
+    display:flex;
+    height:8px;
+    border-radius:4px;
+    overflow:hidden;
+    background:var(--surface-2);
+    gap:2px;
+  }
+  .pilar-seg{ height:100%; min-width:2px; }
+  .pilar-seg.pilar-identidad{ background:var(--pilar-identidad); }
+  .pilar-seg.pilar-autenticidad{ background:var(--pilar-autenticidad); }
+  .pilar-seg.pilar-expresion{ background:var(--pilar-expresion); }
+  .pilar-seg.pilar-sin{ background:var(--border); }
+  .pilar-legend{
+    list-style:none; margin:10px 0 0; padding:0;
+    display:flex; flex-wrap:wrap; gap:10px 16px;
+    font-family:var(--font-body); font-size:12.5px; color:var(--text-muted);
+  }
+  .pilar-legend li{ display:flex; align-items:center; gap:6px; }
+  .pilar-dot{ width:8px; height:8px; border-radius:50%; flex:none; }
+  .pilar-dot-identidad{ background:var(--pilar-identidad); }
+  .pilar-dot-autenticidad{ background:var(--pilar-autenticidad); }
+  .pilar-dot-expresion{ background:var(--pilar-expresion); }
+  .pilar-dot-sin{ background:var(--border); }
+  .pattern-list{
+    list-style:none; margin:0; padding:0;
+    display:flex; flex-direction:column; gap:6px;
+    font-family:var(--font-body); font-size:13.5px; color:var(--text);
+  }
+  .pattern-chip{
+    background:var(--surface-2);
+    border-radius:8px;
+    padding:8px 12px;
+  }
+  .pilar-tag{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:var(--font-body); font-size:12px; font-weight:600;
+    color:var(--text-muted);
+    margin:0 0 10px;
+  }
+  .readonly-note{
+    margin-top:16px;
+    font-size:13px;
+    color:var(--text-muted);
+    background:var(--surface-2);
+    border-radius:8px;
+    padding:10px 14px;
+  }
+  .entries{ display:flex; flex-direction:column; gap:16px; }
+  .empty-state{
+    background:var(--surface);
+    border:1.5px dashed var(--border);
+    border-radius:12px;
+    padding:28px 24px;
+    text-align:center;
+    color:var(--text-muted);
+    font-size:14.5px;
+    line-height:1.6;
+  }
+  .card{
+    position:relative;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-left:4px solid var(--estado-color, var(--gold));
+    border-radius:12px;
+    padding:22px 22px 20px;
+    box-shadow:0 1px 3px var(--shadow);
+    scroll-margin-top:14px;
+  }
+  .card.is-amarillo{ --estado-color:var(--gold); }
+  .card.is-rojo{ --estado-color:var(--accent); }
+  .card.is-verde{ --estado-color:var(--verde); }
+  .card.is-done{ opacity:0.68; }
+  .card-top{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .dot{
+    width:9px; height:9px; border-radius:50%;
+    background:var(--estado-color, var(--gold));
+    flex:none;
+  }
+  .estado-label{
+    font-size:12px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--text-muted);
+    flex:1;
+  }
+  .icon-btn{
+    background:none; border:none; cursor:pointer;
+    color:var(--text-muted);
+    font-size:18px; line-height:1; padding:2px 6px;
+    border-radius:6px;
+  }
+  .icon-btn:hover{ background:var(--surface-2); color:var(--text); }
+  .confirm-row{
+    font-size:13px; color:var(--text-muted);
+    background:var(--surface-2);
+    border-radius:8px; padding:8px 12px; margin-bottom:12px;
+  }
+  .link-btn{
+    background:none; border:none; cursor:pointer;
+    font-family:var(--font-body); font-size:13px; font-weight:600;
+    color:var(--accent); text-decoration:underline; padding:0 4px;
+  }
+  .lugar{
+    font-family:var(--font-display); font-weight:400; font-size:22px;
+    margin:0 0 8px; color:var(--text);
+  }
+  .sensacion{
+    font-family:var(--font-editorial); font-style:italic; font-size:18px; line-height:1.5;
+    color:var(--text); margin:0 0 10px;
+  }
+  .meta-hint{
+    font-size:13px; color:var(--gold); margin:0 0 14px; font-weight:600;
+  }
+  .cuerpo-box{
+    background:var(--soma-soft);
+    border-left:3px solid var(--soma);
+    border-radius:8px;
+    padding:10px 14px;
+    margin:0 0 14px;
+  }
+  .cuerpo-head{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    flex-wrap:wrap;
+    margin:0 0 3px;
+  }
+  .cuerpo-label{
+    display:block;
+    font-family:var(--font-body); font-size:11px; font-weight:700;
+    letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--soma); margin:0;
+  }
+  .cuerpo-zona-tags{
+    display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end;
+  }
+  .cuerpo-zona-tag{
+    font-family:var(--font-body); font-size:10.5px; font-weight:700;
+    color:var(--soma);
+    background:var(--surface);
+    border:1px solid var(--soma);
+    border-radius:999px;
+    padding:2px 9px;
+    flex:none;
+  }
+  .cuerpo-text{
+    font-family:var(--font-body); font-size:14.5px; line-height:1.45;
+    color:var(--text); margin:0;
+  }
+  .fields-row{ display:flex; gap:12px; flex-wrap:wrap; margin:14px 0; }
+  .field{ display:flex; flex-direction:column; gap:5px; font-size:12px; color:var(--text-muted); }
+  .field.full{ width:100%; }
+  .field span{ font-weight:600; letter-spacing:0.02em; }
+  .field input[type="date"], .field input[type="time"], .field input[type="text"], .field textarea, .field select{
+    font-family:var(--font-body); font-size:14px; color:var(--text);
+    background:var(--surface-2); border:1px solid var(--border); border-radius:8px;
+    padding:8px 10px;
+  }
+  .field textarea{ resize:vertical; font-family:var(--font-body); }
+  .field input:focus, .field textarea:focus, .field select:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+  .gcal-link{
+    display:inline-block;
+    font-family:var(--font-body); font-size:12.5px; font-weight:600;
+    color:var(--accent); text-decoration:none;
+    margin:0 0 2px;
+  }
+  .gcal-link:hover{ text-decoration:underline; }
+  .accionable-row{
+    display:flex; align-items:flex-start; gap:10px; cursor:pointer;
+    padding-top:14px; border-top:1px solid var(--border);
+  }
+  .accionable-row input[type="checkbox"]{
+    margin-top:3px; width:16px; height:16px; accent-color:var(--accent); flex:none;
+  }
+  .accionable-text{ font-size:15px; line-height:1.45; color:var(--text); }
+  .is-done .accionable-text{ text-decoration:line-through; color:var(--text-muted); }
+  .add-toggle{
+    font-family:var(--font-body); font-size:14px; font-weight:600;
+    color:var(--text-muted); background:transparent;
+    border:1.5px dashed var(--border); border-radius:12px;
+    padding:16px; cursor:pointer; margin-top:6px; width:100%;
+  }
+  .add-toggle:hover{ color:var(--accent); border-color:var(--accent); }
+  .add-form{
+    display:flex; flex-direction:column; gap:14px;
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:22px; margin-top:6px;
+  }
+  .toggle-question{
+    font-family:var(--font-body); font-size:12px; font-weight:600;
+    letter-spacing:0.02em; color:var(--text-muted); margin:0 0 -4px;
+  }
+  .estado-toggle{ display:flex; gap:18px; font-size:14px; flex-wrap:wrap; }
+  .estado-toggle label{ display:flex; align-items:center; gap:6px; cursor:pointer; }
+  .form-actions{ display:flex; gap:10px; margin-top:4px; }
+  .btn-primary{
+    font-family:var(--font-body); font-weight:700; font-size:14px;
+    background:var(--accent); color:var(--accent-contrast);
+    border:none; border-radius:8px; padding:10px 20px; cursor:pointer;
+  }
+  .btn-primary:hover{ opacity:0.9; }
+  .btn-ghost{
+    font-family:var(--font-body); font-weight:600; font-size:14px;
+    background:transparent; color:var(--text-muted);
+    border:1px solid var(--border); border-radius:8px; padding:10px 18px; cursor:pointer;
+  }
+  .btn-ghost:hover{ color:var(--accent); border-color:var(--accent); }
+  .page-foot{
+    margin-top:40px; text-align:center;
+    font-size:12px; color:var(--text-muted);
+  }
+  .page-foot .credit{ margin:6px 0 0; }
+  .page-foot .credit a{
+    color:var(--accent); font-weight:600; text-decoration:none;
+  }
+  .page-foot .credit a:hover{ text-decoration:underline; }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  [hidden]{ display:none !important; }
+  .celebrate-toast{
+    position:fixed;
+    left:50%;
+    bottom:22px;
+    transform:translateX(-50%);
+    max-width:min(90vw, 420px);
+    background:var(--verde);
+    color:var(--accent-contrast);
+    font-family:var(--font-body); font-size:14px; font-weight:600;
+    text-align:center;
+    padding:12px 20px;
+    border-radius:999px;
+    box-shadow:0 4px 16px var(--shadow);
+    z-index:10;
+    animation:celebrate-in 0.25s ease-out;
+  }
+  @keyframes celebrate-in{
+    from{ opacity:0; transform:translateX(-50%) translateY(8px); }
+    to{ opacity:1; transform:translateX(-50%) translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .celebrate-toast{ animation:none; }
+  }
+  .welcome{
+    max-width:56ch;
+    margin:12px 0 36px;
+  }
+  .welcome .eyebrow{ margin-bottom:10px; }
+  .welcome h1{ font-size:32px; margin-bottom:16px; }
+  .welcome-lema{
+    font-family:var(--font-editorial);
+    font-style:italic;
+    font-size:20px;
+    line-height:1.5;
+    color:var(--text);
+    border-left:3px solid var(--accent);
+    padding-left:16px;
+    margin:0 0 20px;
+  }
+  .welcome-copy{
+    font-family:var(--font-body);
+    font-size:15px;
+    line-height:1.6;
+    color:var(--text-muted);
+    margin:0 0 24px;
+  }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prata&family=Cormorant+Garamond:ital,wght@0,500;1,500&family=DM+Sans:wght@400;500;600;700&display=swap">
+</head>
+<body>
+<div id="app"></div>
+<script id="state-json" type="application/json">{"entries":[]}</script>
+<script id="app-logic">
+(function(){
+  var STORAGE_KEY = 'campo-de-posibilidades-v1';
+  var stateEl = document.getElementById('state-json');
+  var defaultState = JSON.parse(stateEl.textContent);
+  var app = document.getElementById('app');
+  var confirmDeleteId = null;
+  var addOpen = false;
+  var celebrateMsg = null;
+  var celebrateTimer = null;
+
+  var PILARES = {
+    identidad: { label: 'Identidad' },
+    autenticidad: { label: 'Autenticidad' },
+    expresion: { label: 'Expresión Consciente' }
+  };
+  var PILAR_ORDER = ['identidad', 'autenticidad', 'expresion'];
+
+  var LOGRO_FRASES = [
+    'Esto no fue poca cosa. Date el crédito.',
+    'Lo lograste. No lo minimices.',
+    'Detrás de esto hubo trabajo real. Reconocelo.',
+    'Esto cuenta, aunque la costumbre sea decir que no fue nada.',
+    'Pasó de verdad. Dejate sentir que valió el esfuerzo.'
+  ];
+
+  var ZONAS = {
+    cabeza: 'Cabeza',
+    garganta: 'Garganta',
+    pecho: 'Pecho',
+    estomago: 'Estómago / vientre',
+    manos: 'Manos',
+    hombros: 'Hombros / cuello',
+    piernas: 'Piernas',
+    otro: 'Otra zona'
+  };
+  var ZONA_ORDER = ['cabeza', 'garganta', 'pecho', 'estomago', 'manos', 'hombros', 'piernas', 'otro'];
+
+  // Reads the zone(s) felt for an entry regardless of which shape it was saved in:
+  // current entries store an array (`zonas`, multi-select); entries saved before
+  // multi-select was added store a single string (`zona`). Always returns an array.
+  function entryZonas(entry){
+    if (Array.isArray(entry.zonas)){
+      return entry.zonas.filter(function(z){ return ZONAS[z]; });
+    }
+    if (entry.zona && ZONAS[entry.zona]){ return [entry.zona]; }
+    return [];
+  }
+
+  function esc(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+
+  function pad2(n){ return (n < 10 ? '0' : '') + n; }
+
+  function gcalDates(entry){
+    if (!entry.fecha){ return ''; }
+    var datePart = entry.fecha.replace(/-/g, '');
+    if (entry.hora){
+      var start = new Date(entry.fecha + 'T' + entry.hora + ':00');
+      if (isNaN(start.getTime())){ return ''; }
+      var end = new Date(start.getTime() + 60 * 60 * 1000);
+      var startStr = datePart + 'T' + entry.hora.replace(':', '') + '00';
+      var endStr = end.getFullYear() + pad2(end.getMonth() + 1) + pad2(end.getDate())
+        + 'T' + pad2(end.getHours()) + pad2(end.getMinutes()) + '00';
+      return startStr + '/' + endStr;
+    }
+    var d = new Date(entry.fecha + 'T00:00:00');
+    if (isNaN(d.getTime())){ return ''; }
+    d.setDate(d.getDate() + 1);
+    var endDate = d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate());
+    return datePart + '/' + endDate;
+  }
+
+  function buildGCalUrl(entry){
+    var params = ['action=TEMPLATE'];
+    params.push('text=' + encodeURIComponent(entry.accionable || 'Accionable de Campo de Posibilidades'));
+    var dates = gcalDates(entry);
+    if (dates){ params.push('dates=' + dates); }
+    var detailLines = [];
+    if (entry.lugar){ detailLines.push('Posibilidad: ' + entry.lugar); }
+    if (entry.sensacion){ detailLines.push('Sensación: ' + entry.sensacion); }
+    if (detailLines.length){ params.push('details=' + encodeURIComponent(detailLines.join('\n'))); }
+    return 'https://calendar.google.com/calendar/render?' + params.join('&');
+  }
+
+  function loadLocal(){
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw){ return null; }
+      var parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.entries)){ return parsed; }
+    } catch(e){}
+    return null;
+  }
+  function saveLocal(s){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch(e){}
+  }
+
+  var state = loadLocal() || defaultState;
+
+  function persist(newState){
+    state = newState;
+    render();
+    saveLocal(state);
+  }
+
+  function semaforoOf(entry){
+    if (entry.hecho){ return 'verde'; }
+    return entry.estado === 'trabajar' ? 'rojo' : 'amarillo';
+  }
+
+  function countSemaforo(kind){
+    return state.entries.filter(function(e){ return semaforoOf(e) === kind; }).length;
+  }
+
+  function countPilar(key){
+    return state.entries.filter(function(e){ return e.pilar === key; }).length;
+  }
+
+  function detectBodyPatterns(){
+    var counts = {};
+    state.entries.forEach(function(entry){
+      entryZonas(entry).forEach(function(z){
+        counts[z] = (counts[z] || 0) + 1;
+      });
+    });
+    return ZONA_ORDER
+      .filter(function(z){ return counts[z] >= 2; })
+      .map(function(z){ return { zona: z, label: ZONAS[z], count: counts[z] }; })
+      .sort(function(a, b){ return b.count - a.count; });
+  }
+
+  function renderPilarBalance(){
+    var total = state.entries.length;
+    if (!total){ return ''; }
+    var known = 0;
+    var segs = PILAR_ORDER.map(function(key){
+      var count = countPilar(key);
+      known += count;
+      var pct = (count / total * 100);
+      return '<span class="pilar-seg pilar-' + key + '" style="width:' + pct.toFixed(2) + '%"></span>';
+    }).join('');
+    var legend = PILAR_ORDER.map(function(key){
+      return '<li><span class="pilar-dot pilar-dot-' + key + '" aria-hidden="true"></span>' + esc(PILARES[key].label) + ' &middot; ' + countPilar(key) + '</li>';
+    }).join('');
+    var sinDefinir = total - known;
+    if (sinDefinir > 0){
+      segs += '<span class="pilar-seg pilar-sin" style="width:' + (sinDefinir / total * 100).toFixed(2) + '%"></span>';
+      legend += '<li><span class="pilar-dot pilar-dot-sin" aria-hidden="true"></span>Sin definir &middot; ' + sinDefinir + '</li>';
+    }
+    return '<p class="summary-subtitle">Balance de pilares</p>'
+      + '<div class="pilar-bar" role="img" aria-label="Balance de reflexiones por pilar">' + segs + '</div>'
+      + '<ul class="pilar-legend">' + legend + '</ul>';
+  }
+
+  function renderBodyPatterns(){
+    var patterns = detectBodyPatterns();
+    if (!patterns.length){ return ''; }
+    var chips = patterns.map(function(p){
+      return '<li class="pattern-chip">' + esc(p.label) + ': se repitió en ' + p.count + ' reflexiones</li>';
+    }).join('');
+    return '<p class="summary-subtitle">Patrón en el cuerpo</p>'
+      + '<ul class="pattern-list">' + chips + '</ul>';
+  }
+
+  function renderAvance(){
+    var total = state.entries.length;
+    if (!total){ return ''; }
+    var hechos = countSemaforo('verde');
+    var pct = Math.round(hechos / total * 100);
+    var retosTotal = state.entries.filter(function(e){ return e.estado === 'trabajar'; }).length;
+    var retosResueltos = state.entries.filter(function(e){ return e.estado === 'trabajar' && e.hecho; }).length;
+    var retosLine = retosTotal
+      ? ('Resolviste ' + retosResueltos + ' de ' + retosTotal + ' reflexiones que te retaban.')
+      : 'Todavía no marcaste ninguna reflexión como un reto.';
+    return '<p class="summary-subtitle summary-subtitle-first">Tu avance</p>'
+      + '<div class="avance-row">'
+      + '<div class="avance-bar" role="img" aria-label="' + pct + '% de tus reflexiones completadas">'
+      + '<span class="avance-fill" style="width:' + pct + '%"></span>'
+      + '</div>'
+      + '<span class="avance-pct">' + pct + '%</span>'
+      + '</div>'
+      + '<p class="avance-retos">' + retosLine + '</p>';
+  }
+
+  function renderSummary(){
+    if (!state.entries.length){ return ''; }
+    var rows = state.entries.map(function(entry){
+      var sem = semaforoOf(entry);
+      var estadoLabel = sem === 'verde' ? 'Hecho' : (sem === 'rojo' ? 'Te reta' : 'Por hacer');
+      return '<li class="summary-item is-' + sem + '">'
+        + '<a href="#' + esc(entry.id) + '" class="summary-link">'
+        + '<span class="dot" aria-hidden="true"></span>'
+        + '<span class="summary-lugar">' + esc(entry.lugar || 'Sin título') + '</span>'
+        + '<span class="summary-estado">' + esc(estadoLabel) + '</span>'
+        + '</a></li>';
+    }).join('');
+    return '<section class="summary">'
+      + '<p class="summary-title">Resumen</p>'
+      + renderAvance()
+      + '<ul class="summary-list">' + rows + '</ul>'
+      + renderPilarBalance()
+      + renderBodyPatterns()
+      + '</section>';
+  }
+
+  function renderCard(entry){
+    var sem = semaforoOf(entry);
+    var estadoLabel = sem === 'verde' ? 'Hecho' : (sem === 'rojo' ? 'Te reta' : 'Por hacer');
+    var estadoClass = 'is-' + sem;
+    var deleting = confirmDeleteId === entry.id;
+    var html = '<article class="card ' + estadoClass + (entry.hecho ? ' is-done' : '') + '" id="' + esc(entry.id) + '" data-id="' + esc(entry.id) + '">';
+    html += '<div class="card-top">'
+      + '<span class="dot" aria-hidden="true"></span>'
+      + '<span class="estado-label">' + esc(estadoLabel) + '</span>'
+      + '<button type="button" class="icon-btn" data-action="del-start" aria-label="Eliminar reflexión">&times;</button>'
+      + '</div>';
+    if (deleting){
+      html += '<div class="confirm-row">¿Eliminar esta reflexión? '
+        + '<button type="button" class="link-btn" data-action="del-yes">Sí, eliminar</button>'
+        + '<button type="button" class="link-btn" data-action="del-no">Cancelar</button></div>';
+    }
+    html += '<h2 class="lugar">' + esc(entry.lugar) + '</h2>';
+    if (entry.pilar && PILARES[entry.pilar]){
+      html += '<p class="pilar-tag"><span class="pilar-dot pilar-dot-' + entry.pilar + '" aria-hidden="true"></span>' + esc(PILARES[entry.pilar].label) + '</p>';
+    }
+    html += '<p class="sensacion">' + esc(entry.sensacion) + '</p>';
+    var zonas = entryZonas(entry);
+    if (entry.cuerpo || zonas.length){
+      html += '<div class="cuerpo-box"><div class="cuerpo-head"><span class="cuerpo-label">En el cuerpo</span>'
+        + (zonas.length ? '<div class="cuerpo-zona-tags">' + zonas.map(function(z){
+            return '<span class="cuerpo-zona-tag">' + esc(ZONAS[z]) + '</span>';
+          }).join('') + '</div>' : '')
+        + '</div>'
+        + (entry.cuerpo ? '<p class="cuerpo-text">' + esc(entry.cuerpo) + '</p>' : '')
+        + '</div>';
+    }
+    if (entry.meta){ html += '<p class="meta-hint">' + esc(entry.meta) + '</p>'; }
+    html += '<div class="fields-row">'
+      + '<label class="field"><span>Fecha</span><input type="date" data-field="fecha" value="' + esc(entry.fecha) + '"></label>'
+      + '<label class="field"><span>Hora</span><input type="time" data-field="hora" value="' + esc(entry.hora) + '"></label>'
+      + '</div>';
+    html += '<a class="gcal-link" href="' + esc(buildGCalUrl(entry)) + '" target="_blank" rel="noopener noreferrer">Agendar en Google Calendar</a>';
+    html += '<label class="accionable-row">'
+      + '<input type="checkbox" data-field="hecho"' + (entry.hecho ? ' checked' : '') + '>'
+      + '<span class="accionable-text">' + esc(entry.accionable) + '</span>'
+      + '</label>';
+    html += '</article>';
+    return html;
+  }
+
+  function renderAddSection(){
+    if (!addOpen){
+      return '<button type="button" class="add-toggle" data-action="add-open">+ Nueva reflexión</button>';
+    }
+    var zonaCheckboxes = ZONA_ORDER.map(function(z){
+      return '<label><input type="checkbox" name="zona" value="' + z + '"> ' + esc(ZONAS[z]) + '</label>';
+    }).join('');
+    return '<form class="add-form" data-action="add-form">'
+      + '<label class="field full"><span>Posibilidad</span><input type="text" name="lugar" required></label>'
+      + '<label class="field full"><span>Sensación</span><textarea name="sensacion" rows="2" required></textarea></label>'
+      + '<p class="toggle-question">¿En qué zona del cuerpo? (opcional, podés elegir varias)</p>'
+      + '<div class="estado-toggle">' + zonaCheckboxes + '</div>'
+      + '<p class="toggle-question">¿Qué pilar trabaja esta reflexión?</p>'
+      + '<div class="estado-toggle">'
+      + '<label><input type="radio" name="pilar" value="identidad" required> Identidad</label>'
+      + '<label><input type="radio" name="pilar" value="autenticidad" required> Autenticidad</label>'
+      + '<label><input type="radio" name="pilar" value="expresion" required> Expresión Consciente</label>'
+      + '</div>'
+      + '<p class="toggle-question">¿Esto te reta?</p>'
+      + '<div class="estado-toggle">'
+      + '<label><input type="radio" name="estado" value="trabajar"> Sí, me reta</label>'
+      + '<label><input type="radio" name="estado" value="campo" checked> No, ya fluye</label>'
+      + '</div>'
+      + '<label class="field full"><span>Accionable</span><input type="text" name="accionable" required></label>'
+      + '<div class="fields-row">'
+      + '<label class="field"><span>Fecha</span><input type="date" name="fecha"></label>'
+      + '<label class="field"><span>Hora</span><input type="time" name="hora"></label>'
+      + '</div>'
+      + '<div class="form-actions">'
+      + '<button type="submit" class="btn-primary">Guardar</button>'
+      + '<button type="button" class="btn-ghost" data-action="add-cancel">Cancelar</button>'
+      + '</div>'
+      + '</form>';
+  }
+
+  function renderWelcome(){
+    return '<section class="welcome">'
+      + '<p class="eyebrow">Habita tu Marca</p>'
+      + '<h1>Bienvenida a tu Campo de Posibilidades</h1>'
+      + '<p class="welcome-lema">&ldquo;No enseño a hacer marca personal. Enseño a habitarla desde la Identidad, la Autenticidad y la Expresión Consciente.&rdquo;</p>'
+      + '<p class="welcome-copy">Este espacio es tuyo. Cada vez que algo te pase (una conversación, una decisión, un miedo que aparece) anotalo acá: qué sentiste, dónde lo sentiste en el cuerpo y cuál es tu siguiente paso. Con el tiempo vas a lograr ver tus propios patrones, para hacerte responsable y medir el avance en todas tus áreas.</p>'
+      + '<button type="button" class="btn-primary" data-action="welcome-start">Comenzar</button>'
+      + '</section>';
+  }
+
+  function render(){
+    var html = '';
+    var showWelcome = !state.welcomed && !state.entries.length;
+    if (showWelcome){
+      html += renderWelcome();
+      html += '<footer class="page-foot">'
+        + '<p class="credit">Creado por <a href="https://www.instagram.com/carolnataliaoficial/" target="_blank" rel="noopener noreferrer">@carolnataliaoficial</a> &middot; Mujeres con Marca Personal</p>'
+        + '</footer>';
+      app.innerHTML = html;
+      return;
+    }
+    html += '<header class="page-head">'
+      + '<p class="eyebrow">Habita tu Marca &middot; Ejercicio personal</p>'
+      + '<h1>Campo de Posibilidades</h1>'
+      + '<p class="intro">Qué está entrando a tu campo de posibilidades, qué sensación te despierta y cuál es el siguiente paso para avanzar.</p>'
+      + '<div class="stats">'
+      + '<span class="stat stat-verde"><strong>' + countSemaforo('verde') + '</strong>&nbsp;hecho</span>'
+      + '<span class="stat stat-gold"><strong>' + countSemaforo('amarillo') + '</strong>&nbsp;por hacer</span>'
+      + '<span class="stat stat-ruby"><strong>' + countSemaforo('rojo') + '</strong>&nbsp;te reta</span>'
+      + '</div>'
+      + '</header>';
+    html += renderSummary();
+    html += '<section class="entries">'
+      + (state.entries.length
+          ? state.entries.map(renderCard).join('')
+          : '<div class="empty-state">Todavía no agregaste ninguna reflexión. Tocá &ldquo;+ Nueva reflexión&rdquo; y anotá un lugar o tema, qué sensación te despierta, qué sentís en el cuerpo y cuál sería tu siguiente paso.</div>')
+      + '</section>';
+    html += renderAddSection();
+    html += '<footer class="page-foot"><p>Tus respuestas se guardan solas en este navegador. Entrá siempre desde el mismo para no perder tu avance.</p>'
+      + '<p class="credit">Creado por <a href="https://www.instagram.com/carolnataliaoficial/" target="_blank" rel="noopener noreferrer">@carolnataliaoficial</a> &middot; Mujeres con Marca Personal</p>'
+      + '</footer>';
+    if (celebrateMsg){
+      html += '<div class="celebrate-toast" role="status">' + esc(celebrateMsg) + '</div>';
+    }
+    app.innerHTML = html;
+  }
+
+  app.addEventListener('click', function(ev){
+    var actionEl = ev.target.closest('[data-action]');
+    if (!actionEl){ return; }
+    var action = actionEl.getAttribute('data-action');
+    if (action === 'add-open'){ addOpen = true; render(); }
+    else if (action === 'add-cancel'){ addOpen = false; render(); }
+    else if (action === 'welcome-start'){
+      var welcomed = clone(state);
+      welcomed.welcomed = true;
+      persist(welcomed);
+    }
+    else if (action === 'del-start'){
+      var card = actionEl.closest('.card');
+      confirmDeleteId = card ? card.getAttribute('data-id') : null;
+      render();
+    } else if (action === 'del-no'){
+      confirmDeleteId = null; render();
+    } else if (action === 'del-yes'){
+      var card2 = actionEl.closest('.card');
+      var id = card2 ? card2.getAttribute('data-id') : null;
+      var next = clone(state);
+      next.entries = next.entries.filter(function(e){ return e.id !== id; });
+      confirmDeleteId = null;
+      persist(next);
+    }
+  });
+
+  app.addEventListener('change', function(ev){
+    var field = ev.target && ev.target.dataset ? ev.target.dataset.field : null;
+    if (!field){ return; }
+    var card = ev.target.closest('.card');
+    if (!card){ return; }
+    var id = card.getAttribute('data-id');
+    var value = field === 'hecho' ? ev.target.checked : ev.target.value;
+    var next = clone(state);
+    var entry = next.entries.filter(function(e){ return e.id === id; })[0];
+    if (!entry){ return; }
+    var justCompleted = field === 'hecho' && value === true && entry.hecho !== true;
+    entry[field] = value;
+    persist(next);
+    if (justCompleted){
+      celebrateMsg = LOGRO_FRASES[Math.floor(Math.random() * LOGRO_FRASES.length)];
+      render();
+      if (celebrateTimer){ clearTimeout(celebrateTimer); }
+      celebrateTimer = setTimeout(function(){
+        celebrateMsg = null;
+        celebrateTimer = null;
+        render();
+      }, 4000);
+    }
+  });
+
+  app.addEventListener('submit', function(ev){
+    var form = ev.target.closest('[data-action="add-form"]');
+    if (!form){ return; }
+    ev.preventDefault();
+    var fd = new FormData(form);
+    var lugar = (fd.get('lugar') || '').trim();
+    var accionable = (fd.get('accionable') || '').trim();
+    if (!lugar || !accionable){ return; }
+    var entry = {
+      id: 'e' + Date.now().toString(36),
+      lugar: lugar,
+      sensacion: (fd.get('sensacion') || '').trim(),
+      cuerpo: '',
+      zonas: fd.getAll('zona'),
+      pilar: fd.get('pilar') || '',
+      estado: fd.get('estado') || 'campo',
+      accionable: accionable,
+      fecha: fd.get('fecha') || '',
+      hora: fd.get('hora') || '',
+      meta: '',
+      hecho: false
+    };
+    var next = clone(state);
+    next.entries.push(entry);
+    addOpen = false;
+    persist(next);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
